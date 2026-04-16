@@ -227,16 +227,13 @@ async def search(req: SearchRequest):
     return SearchResponse(results=all_results, errors=errors, total=len(all_results))
 
 
-# 로컬 개발 시에만 프론트엔드 정적 파일 서빙 (Vercel은 자체 CDN으로 서빙)
-IS_VERCEL = bool(os.getenv("VERCEL"))
-
-if not IS_VERCEL and FRONTEND_DIST.exists():
+if FRONTEND_DIST.exists():
     app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
 
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
         return FileResponse(str(FRONTEND_DIST / "index.html"))
-elif not IS_VERCEL:
+else:
     @app.get("/")
     async def root():
         return {"message": "프론트엔드 빌드 필요"}
