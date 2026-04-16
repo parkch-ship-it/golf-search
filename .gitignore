@@ -30,3 +30,5 @@ backend/*.png
 # Env
 .env
 .env.*
+
+.vercel
