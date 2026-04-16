@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', -apple-system, sans-serif; }
+  body { margin: 0; background: #f4f6f4; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#1a6b3c] text-white font-bold py-3 px-6 rounded-xl
+           active:scale-95 transition-transform duration-100
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4;
+  }
+  .input-field {
+    @apply w-full border border-gray-200 rounded-xl px-4 py-3
+           text-sm focus:outline-none focus:border-[#1a6b3c] focus:ring-1 focus:ring-[#1a6b3c];
+  }
+  .platform-badge {
+    @apply text-xs font-semibold px-2 py-0.5 rounded-full;
+  }
+}
+
+/* 스크롤바 숨김 (모바일) */
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+/* 로딩 스피너 */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+/* 슬라이드 인 애니메이션 */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.slide-up {
+  animation: slideUp 0.25s ease-out forwards;
+}
