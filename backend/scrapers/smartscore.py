@@ -5,8 +5,13 @@ SSL 오류 → ignore_https_errors + http 시도
 import re
 import logging
 from typing import List
-from playwright.async_api import async_playwright, TimeoutError as PWTimeout
 from .base import BaseScraper
+
+try:
+    from playwright.async_api import async_playwright, TimeoutError as PWTimeout
+    _HAS_PLAYWRIGHT = True
+except ImportError:
+    _HAS_PLAYWRIGHT = False
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +28,9 @@ class SmartScoreScraper(BaseScraper):
 
     async def search(self, date: str, regions: List[str], players: int,
                      time_from: str, time_to: str) -> List[dict]:
+        if not _HAS_PLAYWRIGHT:
+            logger.info("[스마트스코어] Playwright 미설치 - 건너뜀")
+            return []
         results = []
 
         async with async_playwright() as p:

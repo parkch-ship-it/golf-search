@@ -5,8 +5,13 @@
 import re
 import logging
 from typing import List
-from playwright.async_api import async_playwright, TimeoutError as PWTimeout
 from .base import BaseScraper
+
+try:
+    from playwright.async_api import async_playwright, TimeoutError as PWTimeout
+    _HAS_PLAYWRIGHT = True
+except ImportError:
+    _HAS_PLAYWRIGHT = False
 
 logger = logging.getLogger(__name__)
 
