@@ -214,20 +214,14 @@ export default function GroupedCard({ items, showDistance, getDistance, timeRang
                   <div className="text-xs text-gray-400 text-center py-1">티타임 정보 없음</div>
                 ) : (
                   <div className="grid grid-cols-2 gap-1.5">
-                    {slots.map((s, i) => {
-                      const inRange = !s.time || (s.time >= from && s.time <= to)
+                    {slots.filter(s => !s.time || (s.time >= from && s.time <= to)).map((s, i) => {
                       return (
                         <div
                           key={i}
-                          className={`flex items-center justify-between rounded-lg px-2 py-1.5
-                                     border text-xs
-                                     ${inRange
-                                       ? 'bg-white border-gray-100'
-                                       : 'bg-gray-50 border-gray-100 opacity-40'
-                                     }`}
+                          className="flex items-center justify-between rounded-lg px-2 py-1.5 border text-xs bg-white border-gray-100"
                         >
                           <div className="flex items-center gap-1.5">
-                            <span className={`font-bold text-sm w-10 ${inRange ? 'text-[#1a6b3c]' : 'text-gray-400'}`}>
+                            <span className="font-bold text-sm w-10 text-[#1a6b3c]">
                               {s.time}
                             </span>
                             <span className="text-gray-500 truncate max-w-[70px]" title={s.course}>{s.course}</span>
