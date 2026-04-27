@@ -18,13 +18,25 @@ export default function GroupedCard({ items, showDistance, getDistance, timeRang
   const [expandLoading, setExpandLoading] = useState(false)
   // platform → slots[] (undefined=미조회, []=없음)
   const [platformSlots, setPlatformSlots] = useState({})
-  // platform → minPrice (자동 조회된 최저가)
-  const [platformMinPrice, setPlatformMinPrice] = useState({})
   // auto-fetch 완료된 플랫폼 목록 (가격 없어도 완료 표시)
   const [autoFetchDone, setAutoFetchDone] = useState(new Set())
   const autoFetchedRef = useRef(new Set())
 
   const rep = items[0]  // 대표 아이템
+
+  const from = timeRange?.from || '00:00'
+  const to   = timeRange?.to   || '23:59'
+
+  // 시간 범위 내 슬롯에서 최저가 계산
+  function platformMinFromSlots(platform) {
+    const slots = platformSlots[platform]
+    if (!slots || slots.length === 0) return null
+    const prices = slots
+      .filter(s => !s.time || (s.time >= from && s.time <= to))
+      .filter(s => s.price > 0)
+      .map(s => s.price)
+    return prices.length > 0 ? Math.min(...prices) : null
+  }
 
   // 마운트 시: price=0 항목 자동 조회 (가격 표시·정렬용)
   useEffect(() => {
@@ -42,11 +54,12 @@ export default function GroupedCard({ items, showDistance, getDistance, timeRang
         .then(data => {
           const slots = data.slots || []
           setPlatformSlots(prev => ({ ...prev, [item.platform]: slots }))
-          const prices = slots.filter(s => s.price > 0).map(s => s.price)
-          if (prices.length > 0) {
-            const minP = Math.min(...prices)
-            setPlatformMinPrice(prev => ({ ...prev, [item.platform]: minP }))
-            if (onPriceLoaded) onPriceLoaded(item.platform, item.course_name, minP)
+          const prices = slots
+            .filter(s => !s.time || (s.time >= from && s.time <= to))
+            .filter(s => s.price > 0)
+            .map(s => s.price)
+          if (prices.length > 0 && onPriceLoaded) {
+            onPriceLoaded(item.platform, item.course_name, Math.min(...prices))
           }
         })
         .catch(() => {
@@ -85,13 +98,16 @@ export default function GroupedCard({ items, showDistance, getDistance, timeRang
     setExpanded(true)
   }
 
-  // 그룹 최저가 (자동 조회값 우선, 없으면 item.price)
+  // 그룹 최저가 (시간 범위 적용된 슬롯 우선, 없으면 item.price)
   function groupMinPrice() {
     const prices = []
     items.forEach(item => {
-      const auto = platformMinPrice[item.platform]
-      if (auto) prices.push(auto)
-      else if (item.price > 0) prices.push(item.price)
+      const slotMin = platformMinFromSlots(item.platform)
+      if (slotMin !== null) {
+        prices.push(slotMin)
+      } else if (platformSlots[item.platform] === undefined && item.price > 0) {
+        prices.push(item.price)
+      }
     })
     return prices.length > 0 ? Math.min(...prices) : null
   }
@@ -190,8 +206,6 @@ export default function GroupedCard({ items, showDistance, getDistance, timeRang
           {items.map(item => {
             const st = PLATFORM_STYLE[item.platform] || { badge: 'bg-gray-100 text-gray-600', border: 'border-gray-200' }
             const slots = platformSlots[item.platform]
-            const from = timeRange?.from || '00:00'
-            const to   = timeRange?.to   || '23:59'
 
             return (
               <div key={item.platform}>
